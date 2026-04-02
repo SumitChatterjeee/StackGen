@@ -1,6 +1,7 @@
 package com.sumit.StackGen.Entities;
 
 import com.sumit.StackGen.Enums.PreviewStatus;
+import jakarta.persistence.Entity;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;

@@ -1,5 +1,6 @@
 package com.sumit.StackGen.Entities;
 
+import jakarta.persistence.Entity;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
