@@ -1,6 +1,10 @@
 package com.sumit.StackGen.Entities;
 
 import com.sumit.StackGen.Enums.MessageRole;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.Id;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -14,6 +18,7 @@ import java.time.Instant;
 public class ChatMessage {
 
     Long id;
+
     ChatSession chatSession;
 
     String content;
