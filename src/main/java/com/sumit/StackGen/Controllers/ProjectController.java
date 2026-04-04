@@ -4,6 +4,7 @@ import com.sumit.StackGen.DTO.Project.ProjectRequest;
 import com.sumit.StackGen.DTO.Project.ProjectResponse;
 import com.sumit.StackGen.DTO.Project.ProjectSummaryResponse;
 import com.sumit.StackGen.Services.ProjectService;
+import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -32,7 +33,7 @@ public class ProjectController {
     }
 
     @PostMapping("/{user_id}")
-    public ResponseEntity<ProjectResponse> createProject(@RequestBody ProjectRequest request,@PathVariable Long user_id) {
+    public ResponseEntity<ProjectResponse> createProject(@RequestBody @Valid ProjectRequest request, @PathVariable Long user_id) {
         return ResponseEntity.status(HttpStatus.CREATED).body(projectService.createProject(request, user_id));
     }
 

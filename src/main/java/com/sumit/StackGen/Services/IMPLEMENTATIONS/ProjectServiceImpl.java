@@ -6,6 +6,9 @@ import com.sumit.StackGen.DTO.Project.ProjectResponse;
 import com.sumit.StackGen.DTO.Project.ProjectSummaryResponse;
 import com.sumit.StackGen.Entities.Project;
 import com.sumit.StackGen.Entities.User;
+import com.sumit.StackGen.Errors.ResourceNotFoundException;
+import com.sumit.StackGen.Mappers.ProjectMapper;
+import com.sumit.StackGen.Mappers.UserMapper;
 import com.sumit.StackGen.Repositories.ProjectRepo;
 import com.sumit.StackGen.Repositories.UserRepo;
 import com.sumit.StackGen.Services.ProjectService;
@@ -28,34 +31,40 @@ import java.util.Optional;
 @FieldDefaults(makeFinal = true,level = AccessLevel.PRIVATE)
 @Data
 public class ProjectServiceImpl implements ProjectService {
-    ProjectRepo projectReporepo;
+    ProjectRepo projectRepo;
     UserRepo userRepo;
+    ProjectMapper projectMapper;
+    UserMapper userMapper;
 
     @PersistenceContext
     EntityManager entityManager;
     @Override
     public List<ProjectSummaryResponse> getUserProjects(Long userId) {
-        List<Project>arr=projectReporepo.findByOwnerId(userId);
+
+        User user=userRepo.findById(userId).orElseThrow(()->
+                new ResourceNotFoundException("User",userId.toString())
+                );
+        List<Project>arr=projectRepo.findByOwnerId(userId);
         List<ProjectSummaryResponse>res=new ArrayList<>();
-        for(Project p:arr){
-            res.add(new ProjectSummaryResponse(p.getId(),p.getName(),p.getCreatedAt(),p.getUpdatedAt()));
+        for(Project p:arr) {
+            res.add(projectMapper.toProjectSummaryResponse(p));
         }
         return res;
     }
 
     @Override
     public ProjectResponse getUserProjectById(Long projId) {
-        Optional<Project>project=projectReporepo.findById(projId);
-        User owner=project.get().getOwner();
-        UserProfileResponse userProfileResponse=new UserProfileResponse(owner.getId(), owner.getEmail(),owner.getName(),owner.getAvatarUrl());
-        ProjectResponse response=new ProjectResponse(project.get().getId(), project.get().getName(),project.get().getCreatedAt(), project.get().getUpdatedAt(),userProfileResponse);
+        Project project = projectRepo.findById(projId)
+                .orElseThrow(() -> new ResourceNotFoundException("Project",projId.toString()));
+        ProjectResponse response=projectMapper.toProjectResponse(project);
         return response;
     }
-
     @Override
     public ProjectResponse createProject(ProjectRequest request, Long userId) {
 
-        User owner=entityManager.getReference(User.class,userId);
+        User owner=userRepo.findById(userId).orElseThrow(()->
+                new ResourceNotFoundException("User",userId.toString())
+                );
         Project project=new Project();
         project.setName(request.name());
         project.setOwner(owner);
@@ -63,8 +72,8 @@ public class ProjectServiceImpl implements ProjectService {
         project.setUpdatedAt(Instant.now());
         project.setDeletedAt(null);
         project.setIsPublic(true);
-        Project saved=projectReporepo.save(project);
-        projectReporepo.flush();
+        Project saved=projectRepo.save(project);
+        projectRepo.flush();
 
         ProjectResponse response=new ProjectResponse(saved.getId(),saved.getName(),saved.getCreatedAt(),saved.getUpdatedAt(),
                 new UserProfileResponse(owner.getId(), owner.getEmail(), owner.getName(),owner.getAvatarUrl()));
@@ -73,13 +82,13 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public ProjectResponse updateProject(Long id, ProjectRequest request) {
-        Project project = projectReporepo.findById(id)
+        Project project = projectRepo.findById(id)
                 .orElseThrow(() -> new RuntimeException("Project not found"));
 
         project.setName(request.name());
 
-        Optional<Project>saved= Optional.of(projectReporepo.save(project));
-        projectReporepo.flush();
+        Optional<Project>saved= Optional.of(projectRepo.save(project));
+        projectRepo.flush();
         Optional<User>owner=userRepo.findById(saved.get().getOwner().getId());
 
          UserProfileResponse userProfileResponse=new UserProfileResponse(owner.get().getId(),owner.get().getEmail(),owner.get().getName(),owner.get().getAvatarUrl());
@@ -89,6 +98,6 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public void softDelete(Long id) {
-        projectReporepo.deleteById(id);
+        projectRepo.deleteById(id);
     }
 }
