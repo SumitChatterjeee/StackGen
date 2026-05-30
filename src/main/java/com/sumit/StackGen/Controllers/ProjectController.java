@@ -22,19 +22,19 @@ public class ProjectController {
 
     ProjectService projectService;
 
-    @GetMapping("user_id/{user_id}")
-    public ResponseEntity<List<ProjectSummaryResponse>> getMyProjects(@PathVariable Long user_id) {
-        return ResponseEntity.ok(projectService.getUserProjects(user_id));
+    @GetMapping
+    public ResponseEntity<List<ProjectSummaryResponse>> getMyProjects() {
+        return ResponseEntity.ok(projectService.getUserProjects());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ProjectResponse> getProjectById(@PathVariable Long id) {
+    public ResponseEntity<ProjectSummaryResponse> getProjectById(@PathVariable Long id) {
         return ResponseEntity.ok(projectService.getUserProjectById(id));
     }
 
-    @PostMapping("/{user_id}")
-    public ResponseEntity<ProjectResponse> createProject(@RequestBody @Valid ProjectRequest request, @PathVariable Long user_id) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(projectService.createProject(request, user_id));
+    @PostMapping
+    public ResponseEntity<ProjectResponse> createProject(@RequestBody @Valid ProjectRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(projectService.createProject(request));
     }
 
     @PatchMapping("/{id}")

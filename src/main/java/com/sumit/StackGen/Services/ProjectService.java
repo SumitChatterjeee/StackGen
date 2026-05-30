@@ -8,11 +8,11 @@ import java.util.List;
 
 public interface ProjectService {
 
-    List<ProjectSummaryResponse> getUserProjects(Long userId);
+    List<ProjectSummaryResponse> getUserProjects();
 
-    ProjectResponse getUserProjectById(Long id);
+    ProjectSummaryResponse getUserProjectById(Long id);
 
-    ProjectResponse createProject(ProjectRequest request,Long userId);
+    ProjectResponse createProject(ProjectRequest request);
 
     ProjectResponse updateProject(Long id,ProjectRequest request);
 
