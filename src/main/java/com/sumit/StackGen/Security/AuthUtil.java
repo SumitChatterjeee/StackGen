@@ -6,6 +6,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -14,6 +15,7 @@ import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 @Component
 public class AuthUtil {
@@ -27,21 +29,23 @@ public class AuthUtil {
         return Jwts.builder()
                 .subject(user.getUsername())
                 .claim("userId",user.getId().toString())
-                .issuedAt(new Date(System.currentTimeMillis()+1000*60*100))
+                .issuedAt(new Date())
+                .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 100))
                 .signWith(getSecretKey())
                 .compact();
     }
 
     public JwtUserPrincipal verifyAccessToken(String token) {
-        Claims claims = Jwts.parser()
-                .verifyWith(getSecretKey())
-                .build()
-                .parseSignedClaims(token)
-                .getPayload();
+
+           Claims claims = Jwts.parser()
+                   .verifyWith(getSecretKey())
+                   .build()
+                   .parseSignedClaims(token)
+                   .getPayload();
 
         Long userId = Long.parseLong(claims.get("userId", String.class));
         String username = claims.getSubject();
-        return new JwtUserPrincipal(userId, username, new ArrayList<>());
+        return new JwtUserPrincipal(userId, username,new ArrayList<>());
     }
 
     public Long getCurrentUserId() {

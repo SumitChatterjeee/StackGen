@@ -3,6 +3,7 @@ package com.sumit.StackGen.Controllers;
 import com.sumit.StackGen.DTO.Member.InviteMemberRequest;
 import com.sumit.StackGen.DTO.Member.MemberResponse;
 import com.sumit.StackGen.Entities.ProjectMember;
+import com.sumit.StackGen.Security.AuthUtil;
 import com.sumit.StackGen.Services.ProjectMemberService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -20,10 +21,11 @@ import java.util.List;
 public class ProjectMemberController {
 
     ProjectMemberService projectMemberService;
+    AuthUtil auth;
 
     @GetMapping
     public ResponseEntity<List<ProjectMember>> getProjectMembers(@PathVariable Long projectId) {
-        Long userId = 1L;
+        Long userId = auth.getCurrentUserId();
         return ResponseEntity.ok(projectMemberService.getProjectMembers(projectId, userId));
     }
 
@@ -32,7 +34,7 @@ public class ProjectMemberController {
             @PathVariable Long projectId,
             @RequestBody InviteMemberRequest request
     ) {
-        Long userId = 1L;
+        Long userId =1L;
         return ResponseEntity.status(HttpStatus.CREATED).body(
                 projectMemberService.inviteMember(projectId, request, userId)
         );
