@@ -5,6 +5,8 @@ import com.sumit.StackGen.Repositories.ProjectMemberRepo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import static org.springframework.util.ObjectUtils.isEmpty;
+
 @Component("security")
 @RequiredArgsConstructor
 public class SecurityExpressions {
@@ -13,6 +15,7 @@ public class SecurityExpressions {
 
     private boolean hasPermission(Long projectId, ProjectPermissions permissions){
         Long userId=util.getCurrentUserId();
+
         return projectMemberRepo.findRoleByProjectIdAndUserId(projectId,userId)
                 .map(role-> role.getPermissions().contains(permissions))
                 .orElse(false);
