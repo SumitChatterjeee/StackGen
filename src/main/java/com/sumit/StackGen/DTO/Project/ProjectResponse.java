@@ -1,6 +1,7 @@
 package com.sumit.StackGen.DTO.Project;
 
 import com.sumit.StackGen.DTO.Auth.UserProfileResponse;
+import lombok.NoArgsConstructor;
 
 import java.time.Instant;
 

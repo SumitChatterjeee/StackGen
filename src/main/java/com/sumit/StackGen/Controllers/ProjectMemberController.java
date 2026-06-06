@@ -2,9 +2,11 @@ package com.sumit.StackGen.Controllers;
 
 import com.sumit.StackGen.DTO.Member.InviteMemberRequest;
 import com.sumit.StackGen.DTO.Member.MemberResponse;
+import com.sumit.StackGen.DTO.Member.UpdateMemberRoleRequest;
 import com.sumit.StackGen.Entities.ProjectMember;
 import com.sumit.StackGen.Security.AuthUtil;
 import com.sumit.StackGen.Services.ProjectMemberService;
+import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -21,12 +23,9 @@ import java.util.List;
 public class ProjectMemberController {
 
     ProjectMemberService projectMemberService;
-    AuthUtil auth;
-
     @GetMapping
-    public ResponseEntity<List<ProjectMember>> getProjectMembers(@PathVariable Long projectId) {
-        Long userId = auth.getCurrentUserId();
-        return ResponseEntity.ok(projectMemberService.getProjectMembers(projectId, userId));
+    public ResponseEntity<List<MemberResponse>> getProjectMembers(@PathVariable Long projectId) {
+        return ResponseEntity.ok(projectMemberService.getProjectMembers(projectId));
     }
 
     @PostMapping
@@ -34,28 +33,25 @@ public class ProjectMemberController {
             @PathVariable Long projectId,
             @RequestBody InviteMemberRequest request
     ) {
-        Long userId =1L;
         return ResponseEntity.status(HttpStatus.CREATED).body(
-                projectMemberService.inviteMember(projectId, request, userId)
+                projectMemberService.inviteMember(projectId, request)
         );
     }
-
     @PatchMapping("/{memberId}")
     public ResponseEntity<MemberResponse> updateMemberRole(
             @PathVariable Long projectId,
             @PathVariable Long memberId,
-            @RequestBody InviteMemberRequest request
-    ) {
-        Long userId = 1L;
-        return ResponseEntity.ok(projectMemberService.updateMemberRole(projectId, memberId, request, userId));
+            @RequestBody @Valid UpdateMemberRoleRequest roleRequest
+            ) {
+        return ResponseEntity.ok(projectMemberService.updateMemberRole(projectId, memberId, roleRequest));
     }
 
     @DeleteMapping("/{memberId}")
-    public ResponseEntity<MemberResponse> updateMemberRole(
+    public ResponseEntity<Void>updateMemberRole(
             @PathVariable Long projectId,
             @PathVariable Long memberId
     ) {
-        Long userId = 1L;
-        return ResponseEntity.ok(projectMemberService.deleteProjectMember(projectId, memberId, userId));
+       projectMemberService.deleteProjectMember(projectId,memberId);
+       return ResponseEntity.noContent().build();
     }
 }

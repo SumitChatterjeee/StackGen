@@ -61,9 +61,9 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     @PreAuthorize("@security.canViewProject(#projectId)")
-    public ProjectSummaryResponse getUserProjectById(Long projId) {
+    public ProjectSummaryResponse getUserProjectById(Long projectId) {
        Long userId=util.getCurrentUserId();
-       var projectWithRole=projectRepo.findAccessibleProjectByIdWithRole(projId,userId)
+       var projectWithRole=projectRepo.findAccessibleProjectByIdWithRole(projectId,userId)
                .orElseThrow(()-> new BadRequestException("Project Not Found"));
 
        return projectMapper.toProjectSummaryResponse(projectWithRole.getProject(),projectWithRole.getRole());
@@ -74,36 +74,46 @@ public class ProjectServiceImpl implements ProjectService {
 
         Long userId =util.getCurrentUserId();
 
-        User owner=userRepo.getReferenceById(userId);
+        User owner= userRepo.findById(userId).orElseThrow();
 
-        Project project = Project.builder()
-                .name(request.name())
-                .isPublic(false)
-                .build();
+        Project project = new Project();
+        project.setName(request.name());
+        project.setIsPublic(true);
         project = projectRepo.save(project);
 
-        ProjectMemberId projectMemberId = new ProjectMemberId(project.getId(), owner.getId());
-        ProjectMember projectMember = ProjectMember.builder()
-                .id(projectMemberId)
-                .projectRole(ProjectRole.OWNER)
-                .user(owner)
-                .acceptedAt(Instant.now())
-                .invitedAt(Instant.now())
-                .project(project)
-                .build();
-        projectMemberRepo.save(projectMember);
 
-        return projectMapper.toProjectResponse(project);
+
+        ProjectMemberId projectMemberId = new ProjectMemberId(project.getId(), userId);
+        ProjectMember projectMember = new ProjectMember();
+        projectMember.setId(projectMemberId);
+        projectMember.setProject(project);
+        projectMember.setUser(owner);
+        projectMember.setProjectRole(ProjectRole.OWNER);
+        projectMember.setAcceptedAt(Instant.now());
+        projectMember.setAcceptedAt(Instant.now());
+
+        projectMemberRepo.save(projectMember);
+        UserProfileResponse userProfileResponse=new UserProfileResponse(owner.getId(), owner.getUsername(), owner.getName());
+        ProjectResponse projectResponse=new ProjectResponse(
+                project.getId(), project.getName(), project.getCreatedAt(),project.getUpdatedAt(),userProfileResponse
+        );
+
+        return projectResponse;
     }
 
     @Override
     @PreAuthorize("@security.canEditProject(#projectId)")
     public ProjectResponse updateProject(Long projectId, ProjectRequest request) {
         Long userId=util.getCurrentUserId();
+        User user=userRepo.findById(userId).orElseThrow();
         Project project=getAccessibleProjectById(projectId,userId);
         project.setName(request.name());
         project=projectRepo.save(project);
-        return projectMapper.toProjectResponse(project);
+
+        UserProfileResponse response=userMapper.toUserProfileResponse(user);
+
+        ProjectResponse response1=new ProjectResponse(projectId, project.getName(), project.getCreatedAt(),project.getUpdatedAt(),response);
+        return response1;
     }
 
     @Override

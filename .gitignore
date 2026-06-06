@@ -31,4 +31,5 @@ build/
 
 ### VS Code ###
 .vscode/
-/StackGen/src/main/resources/application.yaml
+*.yml
+*.yaml

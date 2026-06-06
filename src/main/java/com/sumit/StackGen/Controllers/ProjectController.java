@@ -23,7 +23,7 @@ public class ProjectController {
     ProjectService projectService;
 
     @GetMapping
-    public ResponseEntity<List<ProjectSummaryResponse>> getMyProjects() {
+    public ResponseEntity<List<ProjectSummaryResponse>> getMyProjects() {//working
         return ResponseEntity.ok(projectService.getUserProjects());
     }
 
@@ -33,7 +33,7 @@ public class ProjectController {
     }
 
     @PostMapping
-    public ResponseEntity<ProjectResponse> createProject(@RequestBody @Valid ProjectRequest request) {
+    public ResponseEntity<ProjectResponse> createProject(@RequestBody @Valid ProjectRequest request) {//working
         return ResponseEntity.status(HttpStatus.CREATED).body(projectService.createProject(request));
     }
 
