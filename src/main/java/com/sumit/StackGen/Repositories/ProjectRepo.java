@@ -47,7 +47,6 @@ public interface ProjectRepo extends JpaRepository<Project, Long> {
     Optional<ProjectWithRole> findAccessibleProjectByIdWithRole(@Param("projectId") Long projectId,
                                                                 @Param("userId") Long userId);
 
-
     interface ProjectWithRole {
         Project getProject();
         ProjectRole getRole();
