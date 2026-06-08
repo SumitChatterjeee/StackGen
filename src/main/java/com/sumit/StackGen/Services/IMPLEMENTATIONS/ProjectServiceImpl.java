@@ -10,6 +10,7 @@ import com.sumit.StackGen.Entities.ProjectMemberId;
 import com.sumit.StackGen.Entities.User;
 import com.sumit.StackGen.Enums.ProjectRole;
 import com.sumit.StackGen.Errors.BadRequestException;
+import com.sumit.StackGen.Errors.ProjectLimitExceededException;
 import com.sumit.StackGen.Errors.ResourceNotFoundException;
 import com.sumit.StackGen.Mappers.ProjectMapper;
 import com.sumit.StackGen.Mappers.UserMapper;
@@ -18,6 +19,7 @@ import com.sumit.StackGen.Repositories.ProjectRepo;
 import com.sumit.StackGen.Repositories.UserRepo;
 import com.sumit.StackGen.Security.AuthUtil;
 import com.sumit.StackGen.Services.ProjectService;
+import com.sumit.StackGen.Services.SubscriptionService;
 import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.Data;
@@ -28,6 +30,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import org.springframework.web.servlet.HandlerExceptionResolver;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -45,7 +48,7 @@ public class ProjectServiceImpl implements ProjectService {
     UserMapper userMapper;
     ProjectMemberRepo projectMemberRepo;
     AuthUtil util;
-
+    SubscriptionService subscriptionService;
 
     @PersistenceContext
     EntityManager entityManager;
@@ -74,7 +77,15 @@ public class ProjectServiceImpl implements ProjectService {
 
         Long userId =util.getCurrentUserId();
 
+        if(!subscriptionService.canCreateNewProject()){
+           throw new ProjectLimitExceededException("Project Limit Exceeded, Please Upgrade");
+        }
+
         User owner= userRepo.findById(userId).orElseThrow();
+
+
+       int count=projectMemberRepo.countProjectOwnedByUser(userId);
+
 
         Project project = new Project();
         project.setName(request.name());
