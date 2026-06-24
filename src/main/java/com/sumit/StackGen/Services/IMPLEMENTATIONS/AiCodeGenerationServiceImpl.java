@@ -1,7 +1,9 @@
 package com.sumit.StackGen.Services.IMPLEMENTATIONS;
 
 import com.sumit.StackGen.DTO.Ai.StreamResponse;
+import com.sumit.StackGen.LLM.Advisors.FileTreeContextAdvisor;
 import com.sumit.StackGen.LLM.PromptUtil;
+import com.sumit.StackGen.LLM.Tools.CodeGenerationTool;
 import com.sumit.StackGen.Security.AuthUtil;
 import com.sumit.StackGen.Services.AiCodeGenerationService;
 import com.sumit.StackGen.Services.ProjectFileService;
@@ -30,8 +32,10 @@ public class AiCodeGenerationServiceImpl implements AiCodeGenerationService {
 
     private final ProjectFileService projectFileService;
 
+    private final FileTreeContextAdvisor fileTreeContextAdvisor;
 
-    @Override
+
+    @Override@PreAuthorize("@security.canEditProject(#projectId)")
     public Flux<String> streamResponse(String message, Long projectId) {
         Long userId = authUtil.getCurrentUserId();
         createChatSessionIfNotExist(projectId,userId);
@@ -42,14 +46,16 @@ public class AiCodeGenerationServiceImpl implements AiCodeGenerationService {
         );
 
         StringBuilder fullResponseBuffer = new StringBuilder();
-
+        CodeGenerationTool codeGenerationTool=new CodeGenerationTool(projectFileService,projectId);
         return chatClient.prompt()
                 .system(PromptUtil.SYSTEM_PROMPT)
                 .user(message)
                 .advisors(advisorSpec -> {
                             advisorSpec.params(advisorParams);
+                            advisorSpec.advisors(fileTreeContextAdvisor);
                         }
                 )
+                .tools(codeGenerationTool)
                 .stream()
                 .chatResponse()
                 .doOnNext(response -> {

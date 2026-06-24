@@ -19,6 +19,7 @@ import com.sumit.StackGen.Repositories.ProjectRepo;
 import com.sumit.StackGen.Repositories.UserRepo;
 import com.sumit.StackGen.Security.AuthUtil;
 import com.sumit.StackGen.Services.ProjectService;
+import com.sumit.StackGen.Services.ProjectTemplateService;
 import com.sumit.StackGen.Services.SubscriptionService;
 import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
@@ -49,6 +50,7 @@ public class ProjectServiceImpl implements ProjectService {
     ProjectMemberRepo projectMemberRepo;
     AuthUtil util;
     SubscriptionService subscriptionService;
+    ProjectTemplateService projectTemplateService;
 
     @PersistenceContext
     EntityManager entityManager;
@@ -104,6 +106,10 @@ public class ProjectServiceImpl implements ProjectService {
         projectMember.setAcceptedAt(Instant.now());
 
         projectMemberRepo.save(projectMember);
+
+        projectTemplateService.initializeProjectFromTemplate(project.getId());
+
+
         UserProfileResponse userProfileResponse=new UserProfileResponse(owner.getId(), owner.getUsername(), owner.getName());
         ProjectResponse projectResponse=new ProjectResponse(
                 project.getId(), project.getName(), project.getCreatedAt(),project.getUpdatedAt(),userProfileResponse
