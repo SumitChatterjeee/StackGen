@@ -16,7 +16,7 @@ StackGenApplicationTests {
 	}
 //    @Test
 //    void check(){
-//        System.out.println(chatClient.prompt("Hollow how are you ").call().content().toString());
+//        System.out.println(chatClient.prompt("what is your model name  ").call().content().toString());
 //    }
 
 }
