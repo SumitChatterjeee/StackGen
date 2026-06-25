@@ -2,7 +2,9 @@ package com.sumit.StackGen.Controllers;
 
 import com.sumit.StackGen.DTO.Ai.ChatRequest;
 import com.sumit.StackGen.DTO.Ai.StreamResponse;
+import com.sumit.StackGen.DTO.Chat.ChatResponse;
 import com.sumit.StackGen.Services.AiCodeGenerationService;
+import com.sumit.StackGen.Services.ChatService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -18,7 +20,7 @@ import java.util.List;
 public class ChatController {
 
     private final AiCodeGenerationService aiCodeGenerationService;
-    //private final ChatService chatService;
+    private final ChatService chatService;
 
     @PostMapping(value = "/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<ServerSentEvent<StreamResponse>> streamChat(
@@ -30,10 +32,10 @@ public class ChatController {
                         .build());
     }
 
-//    @GetMapping("/projects/{projectId}")
-//    public ResponseEntity<List<ChatResponse>> getChatHistory(
-//            @PathVariable Long projectId) {
-//
-//        return ResponseEntity.ok(chatService.getProjectChatHistory(projectId));
-//    }
+     @GetMapping("/projects/{projectId}")
+    public ResponseEntity<List<ChatResponse>> getChatHistory(
+            @PathVariable Long projectId) {
+
+        return ResponseEntity.ok(chatService.getProjectChatHistory(projectId));
+    }
 }
