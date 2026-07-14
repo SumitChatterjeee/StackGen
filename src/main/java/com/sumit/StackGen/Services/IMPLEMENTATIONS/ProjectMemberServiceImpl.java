@@ -7,6 +7,7 @@ import com.sumit.StackGen.Entities.Project;
 import com.sumit.StackGen.Entities.ProjectMember;
 import com.sumit.StackGen.Entities.ProjectMemberId;
 import com.sumit.StackGen.Entities.User;
+import com.sumit.StackGen.Errors.BadRequestException;
 import com.sumit.StackGen.Mappers.ProjectMemberMapper;
 import com.sumit.StackGen.Repositories.ProjectMemberRepo;
 import com.sumit.StackGen.Repositories.ProjectRepo;
@@ -76,10 +77,12 @@ public class ProjectMemberServiceImpl implements ProjectMemberService {
     @PreAuthorize("@security.canManageMembers(#projectId)")
     public MemberResponse updateMemberRole(Long projectId, Long memberId, UpdateMemberRoleRequest role) {
        Long userId=util.getCurrentUserId();
+       if(userId.equals(memberId)){
+           throw new BadRequestException("Owner Can't be VIEWER or EDITOR");
+       }
+       Project project=getAccessibleProjectById(projectId,memberId);
 
-       Project project=getAccessibleProjectById(projectId,userId);
-
-       ProjectMemberId projectMemberId=new ProjectMemberId(projectId,userId);
+       ProjectMemberId projectMemberId=new ProjectMemberId(projectId,memberId);
 
        ProjectMember member=projectMemberRepo.findById(projectMemberId).orElseThrow();
 
