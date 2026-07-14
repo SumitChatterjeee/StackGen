@@ -5,8 +5,10 @@ import com.sumit.StackGen.DTO.Auth.LoginRequest;
 import com.sumit.StackGen.DTO.Auth.SignUpRequest;
 import com.sumit.StackGen.DTO.Auth.UserProfileResponse;
 import com.sumit.StackGen.Entities.User;
+import com.sumit.StackGen.Entities.UserSearchDocument;
 import com.sumit.StackGen.Mappers.UserMapper;
 import com.sumit.StackGen.Repositories.UserRepo;
+import com.sumit.StackGen.Repositories.UserSearchDocRepo;
 import com.sumit.StackGen.Security.AuthUtil;
 import com.sumit.StackGen.Security.JwtUserPrincipal;
 import com.sumit.StackGen.Services.AuthService;
@@ -32,6 +34,7 @@ public class AuthServiceImpl implements AuthService {
     PasswordEncoder passwordEncoder;
     AuthUtil util;
     AuthenticationManager authenticationManager;
+    UserSearchDocRepo userSearchDocRepo;
 
     @Override
     public AuthResponse login(LoginRequest request) {
@@ -60,6 +63,13 @@ public class AuthServiceImpl implements AuthService {
         user.setPasswordHash(passwordEncoder.encode(request.password()));
         user.setName(request.name());
         user = userRepo.save(user);
+
+        UserSearchDocument userSearchDocument=UserSearchDocument.builder()
+                .id(user.getId())
+                .username(user.getUsername())
+                .build();
+
+        userSearchDocRepo.save(userSearchDocument);
 
         String token = util.generateAccessToken(user);
         return new AuthResponse(token, userMapper.toUserProfileResponse(user));
