@@ -94,6 +94,8 @@ public class AiCodeGenerationServiceImpl implements AiCodeGenerationService {
 
                         long duration = (endTime.get() - startTime.get()) /  1000;
                         finalizeChats(userMessage, chatSession, fullResponseBuffer.toString(), duration);
+
+                        System.out.println(fullResponseBuffer.toString());
                     });
                 })
                 .doOnError(error -> log.error("Error during streaming for projectId: {}", projectId))
