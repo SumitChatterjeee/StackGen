@@ -74,7 +74,7 @@ public class StripePaymentProcessor implements PaymentProcessor {
                                                 .build())
                                         .build()
                         )
-                        .setSuccessUrl(frontendUrl + "/success.html?session_id={CHECKOUT_SESSION_ID}")
+                        .setSuccessUrl(frontendUrl)
                         .setCancelUrl(frontendUrl + "/cancel.html")
                         .putMetadata("user_id", userId.toString())
                         .putMetadata("plan_id", plan.getId().toString());

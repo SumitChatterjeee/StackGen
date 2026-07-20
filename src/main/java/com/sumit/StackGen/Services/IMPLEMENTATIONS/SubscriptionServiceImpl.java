@@ -19,6 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Set;
 
 @Service
@@ -32,24 +33,45 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     private final PlanRepo planRepo;
     private final ProjectMemberRepo projectMemberRepo;
 
-    private final Integer FREE_TIER_PROJECTS_ALLOWED = 5;
+    private final Integer FREE_TIER_PROJECTS_ALLOWED=5;
 
     @Override
     public SubscriptionResponse getCurrentSubscription() {
         Long userId= authUtil.getCurrentUserId();
+        System.out.println(">>> After  User Id ");
+
         Subscription subscription=subscriptionRepo.findByUserIdAndStatusIn(userId, Set.of(SubscriptionStatus.ACTIVE, SubscriptionStatus.PAST_DUE,
                 SubscriptionStatus.TRIALING)).orElse(new Subscription());
+
+        System.out.println(">>> After  findByUserIdAndStatusIn ");
         return subscriptionMapper.toSubscriptionResponse(subscription);
 
     }
 
     @Override
+    @Transactional
     public void activateSubscription(Long userId, Long planId, String subscriptionId, String customerId) {
         boolean exists = subscriptionRepo.existsByStripeSubscriptionId(subscriptionId);
         if (exists) return;
 
         User user = getUser(userId);
         Plan plan = getPlan(planId);
+
+        List<Subscription> activeSubscriptions =
+                subscriptionRepo.findAllByUserIdAndStatusIn(
+                        userId,
+                        Set.of(
+                                SubscriptionStatus.ACTIVE,
+                                SubscriptionStatus.TRIALING,
+                                SubscriptionStatus.PAST_DUE
+                        )
+                );
+
+        for (Subscription sub : activeSubscriptions) {
+            sub.setStatus(SubscriptionStatus.CANCELED);
+        }
+
+        subscriptionRepo.saveAll(activeSubscriptions);
 
         Subscription subscription = Subscription.builder()
                 .user(user)
@@ -141,11 +163,12 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     @Override
     public boolean canCreateNewProject() {
         Long userId = authUtil.getCurrentUserId();
+        System.out.println(">>> Before Current Subscription ");
         SubscriptionResponse currentSubscription = getCurrentSubscription();
-
+        System.out.println(">>> After  Current Subscription ");
         int countOfOwnedProjects = projectMemberRepo.countProjectOwnedByUser(userId);
-
-        if(currentSubscription.plan() == null) {
+        System.out.println(">>> After  Count Of Owned Projects ");
+        if (currentSubscription == null || currentSubscription.plan() == null) {
             return countOfOwnedProjects < FREE_TIER_PROJECTS_ALLOWED;
         }
 

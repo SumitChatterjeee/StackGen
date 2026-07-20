@@ -14,14 +14,21 @@ import java.util.List;
 @RequiredArgsConstructor
 public class PlanServiceImpl implements PlanService {
     private final PlanRepo planRepo;
-    private final SubscriptionMapper subscriptionMapper;
     @Override
     public List<PlanResponse> getAllActivePlans() {
        List<Plan> plans=planRepo.findAllPlans();
 
        List<PlanResponse> responses=new ArrayList<>();
        for(Plan p:plans){
-           responses.add(subscriptionMapper.toPlanResponse(p));
+           PlanResponse pl=PlanResponse.builder()
+                   .price(p.getPrice())
+                   .id(p.getId())
+                   .maxProjects(p.getMaxProjects())
+                   .name(p.getName())
+                   .maxTokensPerDay(p.getMaxTokensPerDay())
+                   .unlimitedAi(p.getUnlimitedAi())
+                   .build();
+           responses.add(pl);
        }
        return responses;
     }

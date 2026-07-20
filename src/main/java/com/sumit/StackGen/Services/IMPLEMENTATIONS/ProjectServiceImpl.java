@@ -76,12 +76,13 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     public ProjectResponse createProject(ProjectRequest request) {
 
-
+        System.out.println(">>> CREATE PROJECT CONTROLLER HIT");
         Long userId =util.getCurrentUserId();
 
         if(!subscriptionService.canCreateNewProject()){
            throw new ProjectLimitExceededException("Project Limit Exceeded, Please Upgrade");
         }
+        System.out.println(">>> After Can Create New Project");
 
         User owner= userRepo.findById(userId).orElseThrow();
 

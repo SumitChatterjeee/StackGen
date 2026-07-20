@@ -16,6 +16,7 @@ public class Plan {
 
     String name;
 
+    Double price;
 
     @Column(unique = true)
     String stripePriceId;
