@@ -11,6 +11,9 @@ public interface ProjectFileService {
 
     FileContentResponse getFileContent(Long projectId, String path);
 
+    List<FileContentResponse>downloadFiles(Long projectId);
+
+
     void saveFile(Long projectId, String filePath, String fileContent);
 }
 

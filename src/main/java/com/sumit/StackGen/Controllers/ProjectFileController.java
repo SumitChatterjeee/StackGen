@@ -32,4 +32,9 @@ public class ProjectFileController {
         return ResponseEntity.ok(projectFileService.getFileContent(projectId, path));
     }
 
+    @GetMapping("/download")
+    public ResponseEntity<List<FileContentResponse>> downloadFiles(@PathVariable Long projectId){
+        return ResponseEntity.ok(projectFileService.downloadFiles(projectId));
+    }
+
 }
