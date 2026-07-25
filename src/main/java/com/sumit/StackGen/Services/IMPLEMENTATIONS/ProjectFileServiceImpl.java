@@ -23,6 +23,7 @@ import java.io.InputStream;
 import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -114,5 +115,16 @@ public class ProjectFileServiceImpl implements ProjectFileService {
         if (path.endsWith(".css")) return "text/css";
 
         return "text/plain";
+    }
+
+    @Override
+    public List<FileContentResponse> downloadFiles(Long projectId) {
+        FileTreeResponse fileContentResponse=getFileTree(projectId);
+        List<FileContentResponse>ans=new ArrayList<>();
+        for(FileNode path:fileContentResponse.files()){
+            FileContentResponse fileContentResponse1=getFileContent(projectId,path.toString());
+            ans.add(fileContentResponse1);
+        }
+        return ans;
     }
 }

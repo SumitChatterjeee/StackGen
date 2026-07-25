@@ -1,8 +1,10 @@
 package com.sumit.StackGen.Controllers;
 
+import com.sumit.StackGen.DTO.Preview.DeployResponse;
 import com.sumit.StackGen.DTO.Project.ProjectRequest;
 import com.sumit.StackGen.DTO.Project.ProjectResponse;
 import com.sumit.StackGen.DTO.Project.ProjectSummaryResponse;
+import com.sumit.StackGen.Services.DeploymentService;
 import com.sumit.StackGen.Services.ProjectService;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
@@ -21,6 +23,7 @@ import java.util.List;
 public class ProjectController {
 
     ProjectService projectService;
+    DeploymentService deploymentService;
 
     @GetMapping
     public ResponseEntity<List<ProjectSummaryResponse>> getMyProjects() {//working
@@ -46,6 +49,11 @@ public class ProjectController {
     public ResponseEntity<Void> deleteProject(@PathVariable Long id) {
         projectService.softDelete(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{id}/deploy")
+    public ResponseEntity<DeployResponse> deployProject(@PathVariable Long id) {
+        return ResponseEntity.ok(deploymentService.deploy(id));
     }
 
 }

@@ -80,6 +80,10 @@ public class AiCodeGenerationServiceImpl implements AiCodeGenerationService {
                 .stream()
                 .chatResponse()
                 .doOnNext(response -> {
+                    if (response.getResult() == null ||
+                            response.getResult().getOutput() == null) {
+                            return;
+                    }
                     String content = response.getResult().getOutput().getText();
 
                     if(content != null && !content.isEmpty() && endTime.get() == 0) { // first non-empty chunk received
@@ -99,7 +103,15 @@ public class AiCodeGenerationServiceImpl implements AiCodeGenerationService {
                     });
                 })
                 .doOnError(error -> log.error("Error during streaming for projectId: {}", projectId))
-                .map(response -> Objects.requireNonNull(response.getResult().getOutput().getText()));
+                .map(response -> {
+                    if (response.getResult() == null ||
+                            response.getResult().getOutput() == null) {
+                        return "";
+                    }
+
+                    return Objects.toString(response.getResult().getOutput().getText(), "");
+                })
+                .filter(text -> !text.isBlank());
     }
     private ChatSession createChatSessionIfNotExists(Long projectId, Long userId) {
         ChatSessionId chatSessionId = new ChatSessionId(projectId, userId);
