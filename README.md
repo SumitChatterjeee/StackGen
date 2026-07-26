@@ -61,3 +61,10 @@ This is the Database Architecture
   <li><strong>Authentication:</strong> JWT, Spring Security</li>
   <li><strong>AI Integration:</strong> Spring AI</li>
 </ul>
+
+
+<h3>Application Architecture(Monolithic)<h3>
+
+<img src="application-architecture.png" alt="Application Architecture">
+
+
